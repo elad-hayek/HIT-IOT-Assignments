@@ -1,0 +1,2 @@
+use mosquitto for the broker
+use MQTT for the GUI
