@@ -22,7 +22,7 @@ def on_message(client,userdata,msg):
         m_decode=str(msg.payload.decode("utf-8","ignore"))
         print("message received",m_decode)
 
-client = mqtt.Client("IOT_pub_345354309342431_YY444", clean_session=True) # create new client instance
+client = mqtt.Client("IOT_pub_345354309342431_YY444", clean_session=False) # create new client instance
 
 client.on_connect=on_connect  #bind call back function
 client.on_disconnect=on_disconnect
@@ -37,7 +37,7 @@ client.connect(broker,port)     #connect to broker
 pub_topic= "IOT/class/house/sensor/1/555"
 
 # Next 2 loops will publishing 40 messages to one topic(house) and 2 subtopics(sensor_0 and sensor_1)
-client.publish(pub_topic,"my 'retained' test message 4",0,True)
+client.publish(pub_topic,"my 'retained' test message 4",0,False)
 # for j in range(2):
 #         for i in range(20):
 #              client.publish("matzi/house/sensor_"+str(j),"my  "+str(i)+" message")

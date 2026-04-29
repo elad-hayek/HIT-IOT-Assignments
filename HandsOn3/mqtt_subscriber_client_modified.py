@@ -23,7 +23,7 @@ def on_message(client,userdata,msg):
         print("Message Topic: ", topic)
         print("message received: ", m_decode)
 
-client = mqtt.Client("IOT_sub_22032021_YY44554", clean_session=True) # create new client instance
+client = mqtt.Client("IOT_sub_22032021_YY44554", clean_session=False) # create new client instance
 
 client.on_connect=on_connect  #bind call back function
 client.on_disconnect=on_disconnect
@@ -52,7 +52,7 @@ sub_topic= 'IOT/class/house/sensor/1/555'
 
 client.loop_start()  #Start loop
 ### part for your change
-client.subscribe(sub_topic,qos=0)
+client.subscribe(sub_topic,qos=1)
 ##client.publish("house/sensor1","my first message")
 ##
 time.sleep(10)
