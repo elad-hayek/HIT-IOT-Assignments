@@ -1,10 +1,10 @@
 import socket
 
-nb=1 # 0- HIT-"139.162.222.115", 1 - open HiveMQ - broker.hivemq.com
-brokers=[str(socket.gethostbyname('vmm1.saaintertrade.com')), str(socket.gethostbyname('broker.hivemq.com'))]
-ports=['80','1883']
-usernames = ['MATZI',''] # should be modified for HIT
-passwords = ['MATZI',''] # should be modified for HIT
+nb=0 # 0- HIT-"139.162.222.115", 1 - open HiveMQ - broker.hivemq.com
+brokers=['127.0.0.1', str(socket.gethostbyname('vmm1.saaintertrade.com')), str(socket.gethostbyname('broker.hivemq.com'))]
+ports=['1883', '80']
+usernames = ['', 'MATZI'] # should be modified for HIT
+passwords = ['', 'MATZI'] # should be modified for HIT
 broker_ip=brokers[nb]
 port=ports[nb]
 username = usernames[nb]
