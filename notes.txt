@@ -1,5 +1,5 @@
 use mosquitto for the broker
-use MQTT for the GUI
+use MQTT explorer for the GUI
 
 pip install paho-mqtt==1.1
 
