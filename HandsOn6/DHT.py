@@ -18,7 +18,7 @@ global clientname, CONNECTED
 CONNECTED = False
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id234-"+str(r)
-DHT_topic = 'pr/home/5976397/sts'
+DHT_topic = 'matzi/pr/home/5976397/sts'
 update_rate = 5000 # in msec
 
 class Mqtt_client():

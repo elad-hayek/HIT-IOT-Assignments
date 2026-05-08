@@ -89,8 +89,8 @@ class Mqtt_client():
 
     def connect_to(self):
         # Init paho mqtt client class        
-        from paho.mqtt.enums import CallbackAPIVersion
-        self.client = mqtt.Client(CallbackAPIVersion.VERSION1, self.clientname, clean_session=True) # create new client instance        
+        # from paho.mqtt.enums import CallbackAPIVersion
+        self.client = mqtt.Client(self.clientname, clean_session=True) # create new client instance        
         self.client.on_connect=self.on_connect  #bind call back function
         self.client.on_disconnect=self.on_disconnect
         self.client.on_log=self.on_log

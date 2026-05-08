@@ -15,7 +15,7 @@ from mqtt_init import *
 global clientname
 r=random.randrange(1,10000000)
 clientname="IOT_client-Id-"+str(r)
-relay_topic = 'pr/home/'+str(r)+'/sts'
+relay_topic = 'matzi/pr/home/'+str(r)+'/sts'
 global ON
 ON = False
 
