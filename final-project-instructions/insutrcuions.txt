@@ -1,0 +1,17 @@
+1. Project presentation with short video of running your code(power point format 10-12 slides) - must (9 points)
+
+2. The presentation recording (10-12 min) as a link into the the presentation - must (8 points)
+
+3. Project code (link to your Github repository into the presentation)  - must (30 points)
+
+     The project code, for maximum score should include the next components:
+
+           a. At least tree types of emulators (Data/Message producers like DHT, actuators like Button/Knob and Relay) - 6 points
+
+           b. Data manager app (Collect data from broker and write it to local/cloud DB, process messages and send Warning/Alarm messages) - 8 points
+
+           c. Main GUI app (Show related data changes and Info/Warning/Alarms status window) - 10 points
+
+           d. Local/Cloud DB - 3 points 
+
+4. Project summary (docx and pdf files)  - must (3 points)

@@ -1,0 +1,8 @@
+I need to create a python IOT project that has emulators and communectes over MQTT and stores the results in a SQLite. you can look at the other folders in the workspace and especial the ready to use SmartHome project as refrences for creating the project.
+
+refrence the guid.md and insstuctins.txt files in final-project-instructions for the project.
+           
+for the project summery create a .md file that i can later convert to a docx and pdf files.
+
+create a new final-project folder and put everything there.
+you need to come up with the idea for the smart home project and manifest it in the gui design code and features. make a settings file so it can be easely tested with different brokers ports and other varibales. in the end i need to create a power point presentation so i need the overall theme and flow so if you can create memaid diagrams and store them as code in the project. 
