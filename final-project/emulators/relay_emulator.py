@@ -8,7 +8,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import TOPICS, EMULATOR_NAMES, get_timestamp
-from .mqtt_client import MqttClient
+from emulators.mqtt_client import MqttClient
 
 class RelayEmulator(MqttClient):
     """AC Relay/Switch controller"""

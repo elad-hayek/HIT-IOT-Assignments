@@ -21,7 +21,7 @@ from config import (
 )
 from emulators.mqtt_client import MqttClient
 from db.data_acq import da
-from .gui_helpers import GuiHelpers, MessageFormatter
+from gui.gui_helpers import GuiHelpers, MessageFormatter
 
 class GuiMqttClient(MqttClient):
     """MQTT client for GUI (subscribes to all topics)"""

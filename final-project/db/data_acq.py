@@ -29,7 +29,7 @@ class DataAcquisition:
     def create_connection(self):
         """Create database connection"""
         try:
-            self.conn = sqlite3.connect(self.db_file)
+            self.conn = sqlite3.connect(self.db_file, check_same_thread=False)
             print(f"[DB] Connected to {self.db_file}")
             return self.conn
         except Error as e:

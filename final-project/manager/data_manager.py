@@ -132,6 +132,8 @@ class DataManager(MqttClient):
         self.start_loop()
         self.running = True
         
+        time.sleep(1)
+
         # Subscribe to all home topics
         self.subscribe(self.subscribe_topic)
         print(f"[Manager] Subscribed to {self.subscribe_topic}")

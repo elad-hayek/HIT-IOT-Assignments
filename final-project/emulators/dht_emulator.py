@@ -12,7 +12,7 @@ from config import (
     TOPICS, DHT_PUBLISH_INTERVAL, DHT_TEMP_RANGE, DHT_HUMIDITY_RANGE,
     EMULATOR_NAMES, get_timestamp
 )
-from .mqtt_client import MqttClient
+from emulators.mqtt_client import MqttClient
 
 class DhtEmulator(MqttClient):
     """DHT Sensor emulator - publishes temperature and humidity"""

@@ -12,7 +12,7 @@ from config import (
     THERMOSTAT_SETPOINT_MIN, THERMOSTAT_SETPOINT_MAX,
     EMULATOR_NAMES, get_timestamp
 )
-from .mqtt_client import MqttClient
+from emulators.mqtt_client import MqttClient
 
 class ThermostatEmulator(MqttClient):
     """Thermostat/AC Unit controller"""
