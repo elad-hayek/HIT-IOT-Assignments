@@ -24,11 +24,43 @@ class DhtEmulator(MqttClient):
         self.running = False
         self.temp = DHT_TEMP_RANGE[0]
         self.humidity = DHT_HUMIDITY_RANGE[0]
+        self.ac_state = 'OFF'  # Track AC state (OFF, HEATING, COOLING)
+        self.ac_setpoint = 22  # Track target temperature
+    
+    def on_message(self, client, userdata, msg):
+        """Handle thermostat state changes"""
+        topic = msg.topic
+        message_str = str(msg.payload.decode('utf-8', 'ignore'))
+        
+        try:
+            if 'thermostat/status' in topic:
+                data = json.loads(message_str)
+                self.ac_state = data.get('state', 'OFF')
+                self.ac_setpoint = data.get('setpoint', 22)
+                print(f"[{self.room_name} DHT] AC State: {self.ac_state}, Setpoint: {self.ac_setpoint}°C")
+        except json.JSONDecodeError:
+            pass
     
     def generate_readings(self):
         """Simulate realistic temperature/humidity variations"""
-        # Small random walk to make readings more realistic
-        self.temp += random.uniform(-0.5, 0.5)
+        # AC-based temperature adjustment
+        if self.ac_state == 'HEATING':
+            # Move toward setpoint when heating
+            if self.temp < self.ac_setpoint:
+                self.temp += random.uniform(0.3, 0.8)  # Positive trend toward setpoint
+            else:
+                self.temp += random.uniform(-0.2, 0.2)  # Maintain around setpoint
+        elif self.ac_state == 'COOLING':
+            # Move toward setpoint when cooling
+            if self.temp > self.ac_setpoint:
+                self.temp -= random.uniform(0.3, 0.8)  # Negative trend toward setpoint
+            else:
+                self.temp += random.uniform(-0.2, 0.2)  # Maintain around setpoint
+        else:
+            # Random walk when AC is OFF
+            self.temp += random.uniform(-0.5, 0.5)
+        
+        # Humidity varies naturally
         self.humidity += random.uniform(-2, 2)
         
         # Keep within bounds
@@ -69,6 +101,9 @@ class DhtEmulator(MqttClient):
         self.running = True
 
         time.sleep(1)
+        
+        # Subscribe to thermostat status to track AC state and setpoint
+        self.subscribe(TOPICS['thermostat'])
         
         # Start publishing thread
         thread = Thread(target=self.publishing_loop, daemon=True)
