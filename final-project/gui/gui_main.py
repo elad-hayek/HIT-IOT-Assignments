@@ -210,7 +210,7 @@ class SmartHomeGui(QMainWindow):
         
         self.alerts_text = QTextEdit()
         self.alerts_text.setReadOnly(True)
-        self.alerts_text.setMaximumHeight(150)
+        self.alerts_text.setMaximumHeight(400)
         layout.addWidget(self.alerts_text)
         
         widget.setLayout(layout)

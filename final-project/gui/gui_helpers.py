@@ -67,15 +67,24 @@ class MessageFormatter:
     
     @staticmethod
     def format_alert_message(severity, device_name, message):
-        """Format alert message"""
+        """Format alert message - compact format"""
         timestamp = datetime.now().strftime("%H:%M:%S")
         prefix = {
-            'alert': '[ALERT]',
-            'warning': '[WARNING]',
+            'alert': '⚠ [ALERT]',
+            'warning': '⚠ [WARN]',
             'normal': '[INFO]'
         }.get(severity, '[INFO]')
         
-        return f"{prefix} {timestamp} - {message}"
+        # Extract key info from message (shorten verbose temperature alerts)
+        if 'temperature' in message.lower() and '°C' in message:
+            # Extract temperature and threshold from message
+            import re
+            match = re.search(r'(\d+\.?\d*°C).+?(\d+°C)', message)
+            if match:
+                temp, threshold = match.groups()
+                message = f"{device_name}: {temp} vs {threshold}"
+        
+        return f"{timestamp} {prefix}: {message}"
     
     @staticmethod
     def format_status_message(status):
