@@ -178,15 +178,22 @@ GUI_REFRESH_RATE = 1000    # 1Hz (1000 milliseconds)
 
 ### 1. DHT Sensor Emulator
 
-**What it does:** Simulates temperature/humidity sensor
+**What it does:** Simulates temperature/humidity sensor that responds to AC state
+
+**Key Feature - AC-Responsive:**
+
+- **HEATING mode:** Temperature increases toward setpoint (+0.3 to +0.8°C per 5 sec)
+- **COOLING mode:** Temperature decreases toward setpoint (-0.3 to -0.8°C per 5 sec)
+- **OFF mode:** Random walk (±0.5°C) for natural variation
 
 **Publishes to:** `home/living_room/dht` and `home/bedroom/dht`
 
 **Example output:**
 
 ```
-[Living_Room DHT] Published: Temp=22.5°C, Humidity=55%
-[Bedroom DHT] Published: Temp=20.8°C, Humidity=60%
+[Living_Room DHT] AC State: HEATING, Setpoint: 28°C
+[Living_Room DHT] Published: Temp=23.2°C, Humidity=55%
+[Living_Room DHT] Published: Temp=23.9°C, Humidity=54%
 ```
 
 ### 2. Thermostat Controller
@@ -201,13 +208,27 @@ GUI_REFRESH_RATE = 1000    # 1Hz (1000 milliseconds)
 
 ### 3. AC Relay
 
-**What it does:** ON/OFF switch for AC unit
+**What it does:** ON/OFF switch for AC unit (automatically controlled by Manager)
 
 **States:** ON or OFF
 
-**Subscribe to:** `home/ac/relay/command` (commands from GUI)
+**Key Feature - Automatic Control:**
+
+- Manager automatically sends relay ON when thermostat enters HEATING/COOLING mode
+- Manager automatically sends relay OFF when thermostat enters OFF mode
+- No manual relay commands needed
+
+**Subscribe to:** `home/ac/relay/command` (commands from Manager)
 
 **Publish to:** `home/ac/relay/status`
+
+**Example output:**
+
+```
+[Relay] Received command: {"state":"ON"}
+[Relay] State changed to ON
+[Relay] Published state: ON
+```
 
 ### 4. Data Manager
 
@@ -215,13 +236,19 @@ GUI_REFRESH_RATE = 1000    # 1Hz (1000 milliseconds)
 
 - Listens to all sensors (`home/#`)
 - Stores readings in SQLite database
+- **Automatically controls relay** based on thermostat state changes
 - Checks temperature thresholds
 - Publishes alerts
+
+**Key Feature - Automatic Relay Automation:**
+When thermostat state changes to HEATING or COOLING → sends relay ON
+When thermostat state changes to OFF → sends relay OFF
 
 **Terminal output:**
 
 ```
-[Manager] Message from home/living_room/dht: {"temperature": 22.5, ...}
+[Manager] Message from home/thermostat/status: {"state":"HEATING",...}
+[Manager] Sent relay command: ON
 [Manager] Inserted: DHT_Living_Room temperature 22.5°C
 [Manager] WARNING: DHT_Living_Room temperature 15.2°C below warning threshold 18°C
 ```
@@ -230,11 +257,20 @@ GUI_REFRESH_RATE = 1000    # 1Hz (1000 milliseconds)
 
 **Features:**
 
-- ✅ Real-time sensor display (1Hz update)
-- ✅ Manual AC control (slider + buttons)
-- ✅ Alarm panel with timestamps
-- ✅ Connection status indicator
-- ✅ Color-coded alerts (Green=OK, Orange=Warning, Red=Alert)
+- ✅ Real-time sensor display (1Hz update) - Living Room, Bedroom, Thermostat, Relay
+- ✅ Manual AC control (setpoint slider + state buttons)
+- ✅ Setpoint slider is control-only input (not overwritten by database)
+- ✅ AC controls automatically disabled when broker disconnected
+- ✅ Compact alert panel with color-coded timestamps
+- ✅ Connection status indicator (green/red)
+- ✅ Color-coded temperature warnings (Green=OK, Orange=Warning, Red=Alert)
+
+**Key Improvements:**
+
+- Full-window layout using dock widgets
+- Setpoint slider maintains user input without database interference
+- AC controls enable/disable based on connection status
+- Efficient alert display with shortened message format
 
 ---
 

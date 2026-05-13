@@ -2,49 +2,52 @@
 
 ## Complete Message Flow
 
+## Complete Message Flow
+
 ```mermaid
 sequenceDiagram
     participant DHT as DHT Sensor<br/>(Living Room)
     participant BR as MQTT Broker<br/>(localhost:1883)
+    participant THERMO as Thermostat<br/>Emulator
     participant MG as Data Manager<br/>(Central Processing)
+    participant RELAY as AC Relay
     participant DB as SQLite<br/>Database
     participant GUI as GUI Dashboard
-    participant RELAY as AC Relay
 
-    Note over DHT,RELAY: Step 1: Sensor Data Collection
-    DHT->>BR: Publish: home/living_room/dht<br/>{"temp":22.5,"humidity":55}
+    Note over DHT,GUI: Step 1: User Control
+    GUI->>BR: Publish: home/ac/control<br/>{"state":"HEATING","setpoint":28}
 
-    Note over DHT,RELAY: Step 2: Manager Receives & Processes
-    BR->>MG: Message Delivered (subscribed to home/#)
-    MG->>MG: Parse JSON Message
-    MG->>MG: Check Temperature Thresholds
+    Note over DHT,GUI: Step 2: Thermostat Receives Command
+    BR->>THERMO: Control message delivered
+    THERMO->>THERMO: Update state to HEATING
+    THERMO->>BR: Publish: home/thermostat/status<br/>{"state":"HEATING","setpoint":28}
 
-    Note over DHT,RELAY: Step 3: Data Storage
-    MG->>DB: INSERT iot_data<br/>(timestamp, DHT_LivingRoom, temperature, 22.5, °C)
-    MG->>DB: INSERT iot_data<br/>(timestamp, DHT_LivingRoom, humidity, 55, %)
-
-    Note over DHT,RELAY: Step 4: Alarm Detection (if needed)
-    alt Temperature Warning Triggered
-        MG->>BR: Publish: home/alerts/temperature<br/>{"severity":"warning",...}
-    end
-
-    Note over DHT,RELAY: Step 5: GUI Updates (1Hz Timer)
-    GUI->>DB: Query: SELECT * FROM iot_data<br/>WHERE device_name='DHT_LivingRoom'<br/>ORDER BY timestamp DESC LIMIT 10
-    DB->>GUI: Return latest sensor values
-    GUI->>GUI: Update Display Labels & Colors
-
-    Note over DHT,RELAY: Step 6: User Manual Control
-    GUI->>GUI: User adjusts AC setpoint slider
-    GUI->>BR: Publish: home/ac/control<br/>{"state":"HEATING","setpoint":24}
-
-    Note over DHT,RELAY: Step 7: Actuator Response
-    BR->>RELAY: Deliver Control Command
-    RELAY->>RELAY: Update Relay State (ON/OFF)
+    Note over DHT,GUI: Step 3: Manager Detects State Change & Controls Relay
+    BR->>MG: Thermostat status message
+    MG->>MG: Detect state change (OFF → HEATING)
+    MG->>BR: Publish: home/ac/relay/command<br/>{"state":"ON"}
+    BR->>RELAY: Relay command delivered
+    RELAY->>RELAY: Activate relay (ON)
     RELAY->>BR: Publish: home/ac/relay/status<br/>{"relay_state":"ON"}
 
-    Note over DHT,RELAY: Step 8: GUI Alert Display
-    BR->>GUI: Alert message received
-    GUI->>GUI: Display in Alerts Panel
+    Note over DHT,GUI: Step 4: DHT Responds to AC State
+    BR->>DHT: Thermostat status subscribed
+    DHT->>DHT: Detect HEATING mode + setpoint 28°C
+    DHT->>DHT: Begin heating simulation
+    DHT->>BR: Publish: home/living_room/dht<br/>{"temperature":23.2,"humidity":55}
+
+    Note over DHT,GUI: Step 5: Manager Stores All Data
+    BR->>MG: DHT temperature readings
+    MG->>DB: INSERT iot_data (temperature: 23.2°C)
+    MG->>DB: INSERT iot_data (thermostat state: HEATING)
+    MG->>DB: INSERT iot_data (relay state: ON)
+
+    Note over DHT,GUI: Step 6: GUI Updates Display (1Hz Timer)
+    GUI->>DB: Query latest sensor values
+    DB->>GUI: Return DHT_Living_Room, Thermostat, Relay data
+    GUI->>GUI: Update temperature label (23.2°C)
+    GUI->>GUI: Update thermostat state (HEATING)
+    GUI->>GUI: Update relay state (ON)
 ```
 
 ## Temperature Threshold Check Logic

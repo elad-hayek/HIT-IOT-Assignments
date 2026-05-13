@@ -163,9 +163,18 @@ python gui/gui_main.py
 - ✅ JSON message parsing
 - ✅ Temperature threshold checking
 - ✅ Automatic alarm generation
+- ✅ **Automatic relay control** based on thermostat state changes
 - ✅ <100ms message processing
 
-### 3. SQLite Database Storage
+### 3. AC-Responsive Sensor Simulation
+
+- ✅ DHT emulator responds to thermostat state
+- ✅ HEATING mode: Temperature increases toward setpoint (+0.3 to +0.8°C per reading)
+- ✅ COOLING mode: Temperature decreases toward setpoint (-0.3 to -0.8°C per reading)
+- ✅ OFF mode: Random walk (±0.5°C) for natural variation
+- ✅ Realistic system behavior demonstration
+
+### 4. SQLite Database Storage
 
 - ✅ Automatic insert on every sensor reading
 - ✅ Retention: All data kept (MVP approach)
@@ -191,13 +200,45 @@ python gui/gui_main.py
 ### 6. Architecture Diagrams
 
 - ✅ System architecture (Mermaid)
-- ✅ Data flow sequences (Mermaid)
+- ✅ Data flow sequences (Mermaid) - **Updated to show automatic relay control & AC-responsive DHT**
 - ✅ State machine diagrams (Mermaid)
 - ✅ Timeline and deployment layout (Mermaid)
 
 ---
 
-## 📋 Project Specifications Met
+## � Recent Enhancements (Version 1.0+)
+
+The following improvements were made to enhance system realism and usability:
+
+### DHT Emulator Enhancements
+
+- **AC-Responsive Behavior:** DHT sensors now subscribe to thermostat status and adjust temperature accordingly
+- **Heating Simulation:** Temperature increases toward setpoint at +0.3 to +0.8°C per reading
+- **Cooling Simulation:** Temperature decreases toward setpoint at -0.3 to -0.8°C per reading
+- **Realistic Variation:** When AC is OFF, temperature uses random walk for natural behavior
+
+### Manager Improvements
+
+- **Automatic Relay Control:** Manager detects thermostat state changes and automatically sends relay ON/OFF commands
+- **No Manual Commands Needed:** Relay automation happens without GUI intervention
+- **Improved Data Storage:** Thermostat state and relay state stored correctly in database value field
+
+### GUI Dashboard Enhancements
+
+- **Full-Window Layout:** Dock widgets now fill entire window (no wasted central space)
+- **Control-Only Setpoint Slider:** Slider maintains user input without being overwritten by database updates
+- **Connection-Based Control:** AC controls automatically disabled when broker is disconnected
+- **Compact Alerts:** Alert messages shortened to essential info with timestamps and color coding
+- **Improved Display:** All sensor types (DHT, Thermostat, Relay) displayed with real-time updates
+
+### Database Improvements
+
+- **Variable Limit Support:** fetch_latest_by_device() now supports limit parameter for flexible queries
+- **Better Data Handling:** State values stored in correct database fields for GUI display
+
+---
+
+## �📋 Project Specifications Met
 
 ### From Project Requirements
 

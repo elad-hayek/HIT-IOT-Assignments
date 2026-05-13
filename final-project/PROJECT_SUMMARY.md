@@ -47,11 +47,12 @@
    - Retention: All data kept indefinitely (MVP approach)
 
 5. **Presentation Layer (GUI Dashboard)** - User interface
-   - PyQt5 application with dock widgets
-   - Real-time sensor display (1Hz refresh)
-   - Manual AC control with setpoint slider
-   - Alert/warning message panel
-   - Temperature trend visualization
+   - PyQt5 application with dock widgets filling entire window
+   - Real-time sensor display (1Hz refresh) showing: Living Room, Bedroom, Thermostat state/setpoint, Relay state
+   - Manual AC control: setpoint slider (control input, not database-updated), state buttons (OFF/HEATING/COOLING)
+   - AC controls automatically disabled when broker is disconnected
+   - Compact alert/warning message panel with color-coded severity
+   - System status and live sensor readings with color-coded thresholds (green/orange/red)
 
 ---
 
@@ -61,12 +62,15 @@
 
 **Location:** `emulators/dht_emulator.py`
 
-**Purpose:** Simulate two room-based temperature/humidity sensors
+**Purpose:** Simulate two room-based temperature/humidity sensors that respond to AC state
 
 **Features:**
 
 - Publishes readings every 5 seconds
-- Realistic random walk (±0.5°C per reading)
+- **AC-responsive**: Subscribes to thermostat status and adjusts temperature accordingly
+  - HEATING mode: Temperature increases toward setpoint (+0.3 to +0.8°C per reading)
+  - COOLING mode: Temperature decreases toward setpoint (-0.3 to -0.8°C per reading)
+  - OFF mode: Random walk (±0.5°C per reading) for natural variation
 - Range: 18-30°C temperature, 40-70% humidity
 - JSON message format with timestamp
 - Two instances: Living Room & Bedroom
@@ -144,23 +148,34 @@ python emulators/relay_emulator.py
 
 **Location:** `manager/data_manager.py`
 
-**Purpose:** Central data collection, storage, and alarm management
+**Purpose:** Central data collection, storage, alarm management, and relay automation
 
 **Features:**
 
 - Subscribes to all home topics (`home/#`)
 - Parses incoming JSON messages
 - Inserts readings into SQLite database
+- **Automatic relay control**: Detects thermostat state changes and automatically controls relay
+  - Thermostat state changes to HEATING or COOLING → sends relay ON command
+  - Thermostat state changes to OFF → sends relay OFF command
 - Checks temperature thresholds every 5 seconds
 - Publishes alerts when thresholds exceeded
 - Logs all alerts with severity level
 
 **Alert Thresholds (configurable in `config.py`):**
 
-- Below 16°C: CRITICAL ALERT
-- Below 18°C: WARNING
-- Above 28°C: WARNING
-- Above 32°C: CRITICAL ALERT
+- Below 16°C: CRITICAL ALERT (red)
+- Below 18°C: WARNING (orange)
+- Above 28°C: WARNING (orange)
+- Above 32°C: CRITICAL ALERT (red)
+
+**Relay Control Logic:**
+
+Manager automatically controls relay based on thermostat state transitions:
+
+- State = HEATING or COOLING → Relay ON (AC unit activates)
+- State = OFF → Relay OFF (AC unit stops)
+- This automation happens without GUI involvement
 
 **Database Operations:**
 
@@ -211,10 +226,13 @@ python manager/data_manager.py
 **Technical Details:**
 
 - 1Hz GUI refresh timer (responsive)
-- Database queries every 1 second
+- Database queries every 1 second for sensor displays
+- Setpoint slider is control-only input (not overwritten by database updates)
 - MQTT subscription to all topics
 - Event-driven message updates
 - PyQt5 signals/slots architecture
+- AC controls disabled during broker disconnection
+- blockSignals() prevents accidental commands when updating slider display
 
 **Usage:**
 
@@ -247,7 +265,7 @@ CREATE TABLE iot_data (
 **Key Methods:**
 
 - `add_iot_data()` - Insert new reading
-- `fetch_latest_by_device()` - Get most recent reading for device
+- `fetch_latest_by_device(device_name, limit=1)` - Get N most recent readings for device (supports limit parameter)
 - `fetch_range()` - Get historical data for charting (up to 1000 records)
 - `get_alarm_count()` - Count active alerts in last hour
 - `close()` - Graceful connection shutdown
