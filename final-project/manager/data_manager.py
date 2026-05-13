@@ -23,6 +23,7 @@ class DataManager(MqttClient):
         self.subscribe_topic = MANAGER_SUBSCRIBE_TOPIC
         self.running = False
         self.last_temp = {}  # Track last temperatures for alarm logic
+        self.last_thermostat_state = None  # Track state changes to control relay
     
     def on_message(self, client, userdata, msg):
         """Process incoming MQTT message and store in database"""
@@ -66,6 +67,13 @@ class DataManager(MqttClient):
                 
                 if state:
                     da.add_iot_data(timestamp, device_name, 'state', state, '')
+                    
+                    # Auto-control relay based on thermostat state
+                    if state != self.last_thermostat_state:
+                        self.last_thermostat_state = state
+                        relay_state = 'ON' if state in ['HEATING', 'COOLING'] else 'OFF'
+                        self.send_relay_command(relay_state)
+                
                 if setpoint:
                     da.add_iot_data(timestamp, device_name, 'setpoint', setpoint, '°C')
             
@@ -83,6 +91,15 @@ class DataManager(MqttClient):
         
         except json.JSONDecodeError:
             print(f"[Manager] Invalid JSON: {message_str}")
+    
+    def send_relay_command(self, relay_state):
+        """Send command to relay to turn ON/OFF"""
+        command = json.dumps({
+            'state': relay_state,
+            'timestamp': get_timestamp()
+        })
+        self.publish(TOPICS['relay_control'], command)
+        print(f"[Manager] Sent relay command: {relay_state}")
     
     def check_alarms(self):
         """Check temperature readings against thresholds and trigger alerts"""
