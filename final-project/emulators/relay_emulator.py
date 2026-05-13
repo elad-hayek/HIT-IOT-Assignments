@@ -64,6 +64,8 @@ class RelayEmulator(MqttClient):
         
         self.start_loop()
         self.running = True
+
+        time.sleep(1)
         
         # Subscribe to control commands
         self.subscribe(self.topic_control)

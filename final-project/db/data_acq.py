@@ -72,16 +72,16 @@ class DataAcquisition:
             print(f"[DB ERROR] Insert failed: {e}")
             return None
     
-    def fetch_latest_by_device(self, device_name):
-        """Get latest reading for a specific device"""
+    def fetch_latest_by_device(self, device_name, limit=1):
+        """Get latest readings for a specific device"""
         query = f"""
         SELECT * FROM {DATA_TABLE}
         WHERE device_name = ?
         ORDER BY timestamp DESC
-        LIMIT 1
+        LIMIT ?
         """
         try:
-            df = pd.read_sql_query(query, self.conn, params=[device_name])
+            df = pd.read_sql_query(query, self.conn, params=[device_name, limit])
             return df
         except Error as e:
             print(f"[DB ERROR] Fetch failed: {e}")

@@ -65,7 +65,7 @@ class DataManager(MqttClient):
                 setpoint = data.get('setpoint')
                 
                 if state:
-                    da.add_iot_data(timestamp, device_name, 'state', 0, state)
+                    da.add_iot_data(timestamp, device_name, 'state', state, '')
                 if setpoint:
                     da.add_iot_data(timestamp, device_name, 'setpoint', setpoint, '°C')
             
@@ -75,7 +75,7 @@ class DataManager(MqttClient):
                 relay_state = data.get('relay_state')
                 
                 if relay_state:
-                    da.add_iot_data(timestamp, device_name, 'relay_state', 0, relay_state)
+                    da.add_iot_data(timestamp, device_name, 'relay_state', relay_state, '')
             
             else:
                 # Generic message handling

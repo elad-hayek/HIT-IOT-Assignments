@@ -58,12 +58,11 @@ class SmartHomeGui(QMainWindow):
         self.init_ui()
         self.init_mqtt()
         self.setup_timers()
+        self.enable_ac_controls(False)  # Disabled until connected
     
     def init_ui(self):
         """Initialize UI components"""
-        # Main widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        # Use dock widgets for full-space layout - no central widget needed
         
         # Connection Panel (Top-left dock)
         self.connection_dock = QDockWidget("Connection & Settings")
@@ -243,11 +242,13 @@ class SmartHomeGui(QMainWindow):
         self.connect_button.setEnabled(True)
         self.disconnect_button.setEnabled(False)
         self.update_status("Disconnected", False)
+        self.enable_ac_controls(False)
     
     def on_mqtt_connected(self):
         """Called when MQTT connects"""
         self.mqtt_client.subscribe(MANAGER_SUBSCRIBE_TOPIC)
         self.update_status("Connected", True)
+        self.enable_ac_controls(True)
     
     def update_status(self, status, connected):
         """Update connection status"""
@@ -257,6 +258,13 @@ class SmartHomeGui(QMainWindow):
         else:
             self.status_label.setText(f"Status: {status}")
             self.status_label.setStyleSheet("color: red; font-weight: bold;")
+    
+    def enable_ac_controls(self, enabled):
+        """Enable/disable AC control buttons and slider"""
+        self.setpoint_slider.setEnabled(enabled)
+        self.button_ac_off.setEnabled(enabled)
+        self.button_ac_heat.setEnabled(enabled)
+        self.button_ac_cool.setEnabled(enabled)
     
     def on_setpoint_changed(self, value):
         """Handle setpoint slider change"""
@@ -313,7 +321,7 @@ class SmartHomeGui(QMainWindow):
     def update_sensor_displays(self):
         """Update sensor display labels from database"""
         # Living Room DHT
-        lr_temp = da.fetch_latest_by_device('DHT_Living_Room')
+        lr_temp = da.fetch_latest_by_device('DHT_Living_Room', limit=2)
         if not lr_temp.empty:
             temp_data = lr_temp[lr_temp['sensor_type'] == 'temperature']
             hum_data = lr_temp[lr_temp['sensor_type'] == 'humidity']
@@ -329,7 +337,7 @@ class SmartHomeGui(QMainWindow):
                 self.label_living_room_humidity.setText(f"Humidity: {hum_val}%")
         
         # Bedroom DHT
-        br_temp = da.fetch_latest_by_device('DHT_Bedroom')
+        br_temp = da.fetch_latest_by_device('DHT_Bedroom', limit=2)
         if not br_temp.empty:
             temp_data = br_temp[br_temp['sensor_type'] == 'temperature']
             hum_data = br_temp[br_temp['sensor_type'] == 'humidity']
@@ -344,8 +352,8 @@ class SmartHomeGui(QMainWindow):
                 hum_val = hum_data.iloc[0]['value']
                 self.label_bedroom_humidity.setText(f"Humidity: {hum_val}%")
         
-        # Thermostat
-        thermo = da.fetch_latest_by_device('Thermostat')
+        # Thermostat (display only - slider is a control input, not a sensor display)
+        thermo = da.fetch_latest_by_device('Thermostat', limit=2)
         if not thermo.empty:
             state_data = thermo[thermo['sensor_type'] == 'state']
             setpoint_data = thermo[thermo['sensor_type'] == 'setpoint']
@@ -357,10 +365,6 @@ class SmartHomeGui(QMainWindow):
             if not setpoint_data.empty:
                 setpoint = setpoint_data.iloc[0]['value']
                 self.label_thermostat_setpoint.setText(f"Setpoint: {setpoint}°C")
-                self.setpoint_slider.blockSignals(True)
-                self.setpoint_slider.setValue(int(setpoint))
-                self.setpoint_slider.blockSignals(False)
-                self.label_setpoint_value.setText(f"{int(setpoint)}°C")
         
         # Relay
         relay = da.fetch_latest_by_device('AC_Relay')

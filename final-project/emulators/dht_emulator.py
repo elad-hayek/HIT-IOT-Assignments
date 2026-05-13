@@ -67,6 +67,8 @@ class DhtEmulator(MqttClient):
         
         self.start_loop()
         self.running = True
+
+        time.sleep(1)
         
         # Start publishing thread
         thread = Thread(target=self.publishing_loop, daemon=True)
